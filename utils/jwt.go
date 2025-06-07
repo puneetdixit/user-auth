@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	log "github.com/sirupsen/logrus"
 )
 
 var jwtKey = []byte("supersecret") // TODO: use env var in production
@@ -36,6 +37,7 @@ func ValidateJWT(tokenStr string) (*models.User, error) {
 	})
 
 	if err != nil || !token.Valid {
+		log.Info("Error : ", err)
 		return nil, errors.New("invalid token")
 	}
 

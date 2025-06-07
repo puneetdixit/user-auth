@@ -1,12 +1,13 @@
 package controllers
 
 import (
-	"net/http"
 	"user-auth/models"
 	"user-auth/utils"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	log "github.com/sirupsen/logrus"
 )
 
 type RegisterInput struct {
@@ -40,6 +41,12 @@ type LoginInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type ProfileResponse struct {
+	ID uint `json:"id"`
+	Email string `json:"email"`
+	Username string `json:"username"`
+}
+
 func Login(c *gin.Context) {
 	var input LoginInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -65,5 +72,15 @@ func Login(c *gin.Context) {
 
 func Profile(c *gin.Context) {
 	user, _ := c.Get("user")
-	c.JSON(http.StatusOK, gin.H{"profile": user})
+	userData := user.(*models.User)
+
+	log.Info("user", userData)
+	profile := ProfileResponse{
+		ID:       userData.ID,
+		Email:    userData.Email,
+		Username: userData.Username,
+	}
+
+
+	c.JSON(http.StatusOK, profile)
 }
