@@ -3,6 +3,7 @@ package controllers
 import (
 	"user-auth/models"
 	"user-auth/utils"
+	"user-auth/config"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,8 +32,13 @@ func Register(c *gin.Context) {
 		Password: string(hashedPassword),
 	}
 
-	models.DB.Create(&user)
+	var userExists models.User
+	if config.DB.Where("email = ? or username = ?", input.Email, input.Username).First(&userExists).RowsAffected != 0 {
+		c.JSON(http.StatusConflict, gin.H{"error": "User already registered with username or email"})
+		return
+	}
 
+	config.DB.Create(&user)
 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
 }
 
@@ -55,7 +61,7 @@ func Login(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := models.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
+	if err := config.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 		return
 	}

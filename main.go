@@ -3,18 +3,23 @@ package main
 import (
 	"user-auth/controllers"
 	"user-auth/middleware"
-	"user-auth/models"
 	"user-auth/utils"
+	"user-auth/config"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	utils.InitLogger()
-	models.ConnectDatabase()
+	config.ConnectDatabase()
 
-	log.Info("Stating Server...")
+	log.Info("Starting Server...")
 	r := gin.Default()
 
 	r.POST("/register", controllers.Register)
@@ -24,5 +29,5 @@ func main() {
 	protected.Use(middleware.AuthMiddleware())
 	protected.GET("/profile", controllers.Profile)
 
-	r.Run(":8080")
+	r.Run(":8081")
 }

@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"user-auth/models"
+	"user-auth/config"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -42,7 +43,7 @@ func ValidateJWT(tokenStr string) (*models.User, error) {
 	}
 
 	var user models.User
-	if err := models.DB.First(&user, claims.UserID).Error; err != nil {
+	if err := config.DB.First(&user, claims.UserID).Error; err != nil {
 		return nil, errors.New("user not found")
 	}
 
