@@ -5,6 +5,7 @@ import (
 	"user-auth/middleware"
 	"user-auth/utils"
 	"user-auth/config"
+	"user-auth/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -18,6 +19,7 @@ func main() {
 	}
 	utils.InitLogger()
 	config.ConnectDatabase()
+	config.DB.AutoMigrate(&models.User{}, &models.URL{})
 
 	log.Info("Starting Server...")
 	r := gin.Default()
@@ -28,6 +30,11 @@ func main() {
 	protected := r.Group("/user")
 	protected.Use(middleware.AuthMiddleware())
 	protected.GET("/profile", controllers.Profile)
+
+	
+	urlRoutes := r.Group("/url")
+	urlRoutes.Use(middleware.AuthMiddleware())
+	urlRoutes.POST("/add", controllers.AddUrl)
 
 	r.Run(":8081")
 }
