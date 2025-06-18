@@ -1,16 +1,17 @@
 package utils
 
 import (
+	"os"
 	"errors"
-	"user-auth/models"
-	"user-auth/config"
 	"time"
+	"user-auth/config"
+	"user-auth/models"
 
 	"github.com/golang-jwt/jwt/v5"
 	log "github.com/sirupsen/logrus"
 )
 
-var jwtKey = []byte("supersecret") // TODO: use env var in production
+var jwtKey = []byte(os.Getenv("DB_HOST"))
 
 type Claims struct {
 	UserID uint `json:"user_id"`

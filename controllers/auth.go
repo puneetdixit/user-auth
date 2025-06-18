@@ -1,14 +1,14 @@
 package controllers
 
 import (
+	"net/http"
+	"user-auth/config"
 	"user-auth/models"
 	"user-auth/utils"
-	"user-auth/config"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type RegisterInput struct {
@@ -34,7 +34,11 @@ func Register(c *gin.Context) {
 
 	var userExists models.User
 	if config.DB.Where("email = ? or username = ?", input.Email, input.Username).First(&userExists).RowsAffected != 0 {
-		c.JSON(http.StatusConflict, gin.H{"error": "User already registered with username or email"})
+		if userExists.Email == input.Email {
+			c.JSON(http.StatusConflict, gin.H{"error": "User already registered with this email"})
+		} else {
+			c.JSON(http.StatusConflict, gin.H{"error": "User already registered with this username"})
+		}
 		return
 	}
 
@@ -48,8 +52,8 @@ type LoginInput struct {
 }
 
 type ProfileResponse struct {
-	ID uint `json:"id"`
-	Email string `json:"email"`
+	ID       uint   `json:"id"`
+	Email    string `json:"email"`
 	Username string `json:"username"`
 }
 
@@ -62,12 +66,12 @@ func Login(c *gin.Context) {
 
 	var user models.User
 	if err := config.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email"})
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Wrong password"})
 		return
 	}
 
@@ -86,7 +90,6 @@ func Profile(c *gin.Context) {
 		Email:    userData.Email,
 		Username: userData.Username,
 	}
-
 
 	c.JSON(http.StatusOK, profile)
 }

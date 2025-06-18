@@ -1,11 +1,11 @@
 package main
 
 import (
+	"user-auth/config"
 	"user-auth/controllers"
 	"user-auth/middleware"
-	"user-auth/utils"
-	"user-auth/config"
 	"user-auth/models"
+	"user-auth/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -31,10 +31,9 @@ func main() {
 	protected.Use(middleware.AuthMiddleware())
 	protected.GET("/profile", controllers.Profile)
 
-	
 	urlRoutes := r.Group("/url")
 	urlRoutes.Use(middleware.AuthMiddleware())
 	urlRoutes.POST("/add", controllers.AddUrl)
-
+	urlRoutes.GET("/get", controllers.GetUrl)
 	r.Run(":8081")
 }
